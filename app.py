@@ -1,43 +1,49 @@
 import streamlit as st
-from openai import OpenAI
-import json
 
-# Function to serialize the output
-def serialize(obj):
-    """Recursively walk object's hierarchy."""
-    if isinstance(obj, (bool, int, float, str)):
-        return obj
-    elif isinstance(obj, dict):
-        obj = obj.copy()
-        for key in obj:
-            obj[key] = serialize(obj[key])
-        return obj
-    elif isinstance(obj, list):
-        return [serialize(item) for item in obj]
-    elif isinstance(obj, tuple):
-        return tuple(serialize(item) for item in obj)
-    elif hasattr(obj, '__dict__'):
-        return serialize(obj.__dict__)
+def parse_measurement(measurement):
+    """ Parses a measurement string (feet and inches) and returns total inches. """
+    if '"' in measurement:
+        measurement = measurement.replace('"', '')
+
+    parts = measurement.split("'")
+    feet = 0
+    inches = 0
+
+    if len(parts) == 2:
+        feet = float(parts[0]) if parts[0] else 0
+        inches = int(parts[1]) if parts[1] else 0
+    elif "'" in measurement:
+        feet = float(parts[0]) if parts[0] else 0
     else:
-        return repr(obj)  # Don't know how to handle, convert to string
+        try:
+            feet = float(measurement)
+        except ValueError:
+            return 0  # Return 0 if the input is not a valid number
 
-# Access the OpenAI API key from Streamlit secrets
-api_key = st.secrets["openai_secret"]
+    return int(feet * 12 + inches)
 
-# Initialize the OpenAI client with the API key from secrets
-client = OpenAI(api_key=api_key)
+def calculate_total_measurements(input_str):
+    """ Calculates the total of measurements input in the format '2+3'4"+5'6"'. """
+    try:
+        measurements = input_str.split('+')
+        total_inches = sum(parse_measurement(m.strip()) for m in measurements)
+        feet = total_inches // 12
+        inches = total_inches % 12
+        return f"{feet}'{inches}\""
+    except Exception as e:
+        return "Error in calculation"
 
 # Streamlit UI components
-st.title('''Natural Language Processing Detection NEW''')
+st.title('Kitchen Cabinet Measurement Calculator')
 
-user_input = st.text_area("Enter text to moderate")
+features = ['Upper Cabinets', 'Lower Cabinets', 'Countertop', 'Backsplash', 'Full Cabinets']
+user_inputs = {feature: st.text_input(f"Enter measurements for {feature} (e.g., 2+3'4\"+5'6\"): ") for feature in features}
 
-if st.button('Moderate'):
-    response = client.moderations.create(input=user_input)
-    output = response.results[0]
-    serialized_output = serialize(output)
-    json_output = json.dumps(serialized_output, indent=2, ensure_ascii=False)
-    st.json(json_output)
-    
-#edited from here
-st.data_editor(data, num_rows="dynamic")
+if st.button('Calculate'):
+    st.subheader("Total Linear Feet and Inches for each feature:")
+    for feature, input_str in user_inputs.items():
+        total = calculate_total_measurements(input_str)
+        st.text(f"{feature}: {total}")
+
+# Optional: Any additional functionality or components you want to add
+
