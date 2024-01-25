@@ -34,7 +34,7 @@ def calculate_total_measurements(input_str):
         return "Error in calculation"
 
 # Streamlit UI components
-st.title('Kitchen Cabinet Measurement Calculator')
+st.title('Kitchen Cabinet Calculator')
 
 #image_path = 'CalculatorApp.png'  # Replace with your image path or URL
 #st.image(image_path, caption='Kitchen Cabinet Example')
