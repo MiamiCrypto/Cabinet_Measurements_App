@@ -43,6 +43,9 @@ st.title('Kitchen Cabinet Calculator')
 image_path = 'CalculatorApp.png'  # Image path or URL
 st.image(image_path, caption='Kitchen Cabinet Example', width=300)  # Set the width as needed
 
+image_path2 = 'Ai image.png'  # Image path or URL
+st.image(image_path2, caption='Kitchen Cabinet Example', width=300)  # Set the width as needed
+
 features = ['Upper Cabinets', 'Lower Cabinets', 'Countertop', 'Backsplash', 'Full Cabinets']
 user_inputs = {feature: st.text_input(f"Enter measurements for {feature} (e.g., 2+3'4\"+5'6\"): ") for feature in features}
 
